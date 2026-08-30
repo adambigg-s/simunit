@@ -1,6 +1,7 @@
 use std::ops;
 
 use crate::unit;
+#[cfg(debug_assertions)]
 use crate::unit_cache as uc;
 
 #[derive(Debug, Default, Clone)]
@@ -21,6 +22,11 @@ impl<V> Value<V>
                _units: uc::UnitCache::new(),
           }
      }
+
+     pub fn units(&self) -> Vec<uc::UnitDimensionality>
+     {
+          self._units.unit_dimensionality()
+     }
 }
 
 #[cfg(debug_assertions)]
@@ -33,6 +39,21 @@ where
      fn mul(mut self, rhs: U) -> Self::Output
      {
           self._units *= rhs;
+          self
+     }
+}
+
+#[cfg(debug_assertions)]
+impl<V> ops::Mul for Value<V>
+where
+     V: ops::Mul<Output = V>,
+{
+     type Output = Value<V>;
+
+     fn mul(mut self, rhs: Self) -> Self::Output
+     {
+          self._units *= rhs._units;
+          self.value = self.value * rhs.value;
           self
      }
 }

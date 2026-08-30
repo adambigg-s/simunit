@@ -1,4 +1,5 @@
 use std::any;
+use std::f64;
 use std::fmt;
 use std::ops;
 use std::rc;
@@ -12,6 +13,29 @@ pub struct UnitDimensionality
 {
      dim: f64,
      _unit: rc::Rc<dyn unit::Unit>,
+}
+
+impl UnitDimensionality
+{
+     pub fn new<U>(unit: U) -> Self
+     where
+          U: unit::Unit,
+     {
+          Self {
+               dim: 1.0,
+               _unit: rc::Rc::new(unit),
+          }
+     }
+
+     pub fn with_exp<U>(unit: U, exp: f64) -> Self
+     where
+          U: unit::Unit,
+     {
+          Self {
+               dim: exp,
+               _unit: rc::Rc::new(unit),
+          }
+     }
 }
 
 impl fmt::Debug for UnitDimensionality
@@ -37,6 +61,11 @@ impl UnitCache
      {
           Self::default()
      }
+
+     pub fn unit_dimensionality(&self) -> Vec<UnitDimensionality>
+     {
+          self.inner.values().cloned().collect()
+     }
 }
 
 impl ops::BitXor<f64> for UnitCache
@@ -54,11 +83,22 @@ impl<U> ops::MulAssign<U> for UnitCache
 where
      U: unit::Unit + 'static,
 {
+     #[allow(clippy::suspicious_op_assign_impl)]
      fn mul_assign(&mut self, rhs: U)
      {
-          let t_id = rhs.type_id();
-          // self.inner.entry(t_id).
-          // let x = self.inner.get_mut(&t_id).get_or_insert_default();
-          // x.dim += rhs;
+          self.inner
+               .entry(rhs.type_id())
+               .and_modify(|entry| entry.dim += 1.0)
+               .or_insert(UnitDimensionality::new(rhs));
+     }
+}
+
+impl ops::MulAssign for UnitCache
+{
+     fn mul_assign(&mut self, rhs: Self)
+     {
+          rhs.inner.into_iter().for_each(|(id, ud)| {
+               self.inner.entry(id).and_modify(|entry| entry.dim += ud.dim).or_insert(ud);
+          });
      }
 }

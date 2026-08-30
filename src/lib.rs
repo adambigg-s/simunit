@@ -5,7 +5,9 @@ pub mod value;
 #[cfg(test)]
 mod tests
 {
-     use crate::unit;
+     use std::sync::Arc;
+
+use crate::unit;
      use crate::value;
 
      pub struct Meter;
@@ -24,5 +26,10 @@ mod tests
           // let tu = 10 * Meter;
           assert!(xu.value == 10);
           assert!(su.value == 10);
-     }
+
+          let zz = su * xu;
+          assert!(zz.value == 100);
+          let dims = zz.units();
+          assert!(dims.len() == 2);
+    }
 }
