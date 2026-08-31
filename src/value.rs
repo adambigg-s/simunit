@@ -1,8 +1,14 @@
 use std::ops;
 
 use crate::unit;
+use crate::unit_cache;
 #[cfg(debug_assertions)]
 use crate::unit_cache as uc;
+
+pub trait AsValue<V>
+{
+     fn as_value(&self) -> Value<V>;
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct Value<V>
@@ -26,6 +32,19 @@ impl<V> Value<V>
      pub fn units(&self) -> Vec<uc::UnitDimensionality>
      {
           self._units.unit_dimensionality()
+     }
+}
+
+impl<V> From<unit_cache::UnitCache> for Value<V>
+where
+     V: Default,
+{
+     fn from(value: unit_cache::UnitCache) -> Self
+     {
+          Self {
+               value: V::default(),
+               _units: value,
+          }
      }
 }
 

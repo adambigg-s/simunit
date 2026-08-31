@@ -2,7 +2,7 @@ use std::any;
 use std::f64;
 use std::fmt;
 use std::ops;
-use std::rc;
+use std::sync;
 
 use rustc_hash as rh;
 
@@ -12,7 +12,7 @@ use crate::unit;
 pub struct UnitDimensionality
 {
      dim: f64,
-     _unit: rc::Rc<dyn unit::Unit>,
+     _unit: sync::Arc<dyn unit::Unit>,
 }
 
 impl UnitDimensionality
@@ -23,7 +23,7 @@ impl UnitDimensionality
      {
           Self {
                dim: 1.0,
-               _unit: rc::Rc::new(unit),
+               _unit: sync::Arc::new(unit),
           }
      }
 
@@ -33,8 +33,18 @@ impl UnitDimensionality
      {
           Self {
                dim: exp,
-               _unit: rc::Rc::new(unit),
+               _unit: sync::Arc::new(unit),
           }
+     }
+}
+
+impl<U> From<U> for UnitDimensionality
+where
+     U: unit::Unit,
+{
+     fn from(value: U) -> Self
+     {
+          Self::new(value)
      }
 }
 
@@ -65,6 +75,19 @@ impl UnitCache
      pub fn unit_dimensionality(&self) -> Vec<UnitDimensionality>
      {
           self.inner.values().cloned().collect()
+     }
+}
+
+impl From<UnitDimensionality> for UnitCache
+{
+     fn from(value: UnitDimensionality) -> Self
+     {
+          let key = (*value._unit).type_id();
+          let mut hash = rh::FxHashMap::default();
+          hash.insert(key, value);
+          Self {
+               inner: hash,
+          }
      }
 }
 
