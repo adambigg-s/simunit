@@ -44,7 +44,10 @@ impl MulIdentity for f32  { fn one() -> Self { 1 as f32  } }
 impl MulIdentity for f64  { fn one() -> Self { 1 as f64  } }
 impl MulIdentity for f128 { fn one() -> Self { 1 as f128 } }
 
-pub trait Number {
+pub trait Number
+where
+     Self: AddIdentity + MulIdentity,
+{
      fn to_f16(self) -> f16;
 
      fn to_f32(self) -> f32;

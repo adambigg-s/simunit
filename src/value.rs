@@ -1,5 +1,6 @@
 use std::ops;
 
+use crate::number_traits;
 use crate::unit;
 use crate::unit_cache;
 #[cfg(debug_assertions)]
@@ -37,12 +38,12 @@ impl<V> Value<V>
 
 impl<V> From<unit_cache::UnitCache> for Value<V>
 where
-     V: Default,
+     V: number_traits::Number,
 {
      fn from(value: unit_cache::UnitCache) -> Self
      {
           Self {
-               value: V::default(),
+               value: V::one(),
                _units: value,
           }
      }

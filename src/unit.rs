@@ -1,5 +1,6 @@
 use std::any;
 
+use crate::number_traits;
 use crate::unit_cache;
 use crate::value;
 
@@ -16,7 +17,7 @@ where
 impl<V, U> value::AsValue<V> for U
 where
      U: Unit + Copy,
-     V: Default,
+     V: number_traits::Number,
 {
      fn as_value(&self) -> value::Value<V>
      {

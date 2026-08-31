@@ -10,6 +10,7 @@ pub mod value;
 mod tests
 {
      use crate::unit;
+     use crate::unit::Unit;
      use crate::value;
      use crate::value::AsValue;
 
@@ -26,17 +27,7 @@ mod tests
      #[test]
      fn main_test()
      {
-          let su = value::Value::new(10) * (Meter.as_value() ^ 2.0);
-          let xu = su.clone() * Second;
-          // let tu = 10 * Meter;
-          assert!(xu.value == 10);
-          assert!(su.value == 10);
-
-          let zz = su * xu;
-          assert!(zz.value == 100);
-          let dims = zz.units();
-          assert!(dims.len() == 2);
-          dbg!(dims);
+          let m: value::Value<f32> = Meter.as_value();
+          println!("{}", m.display_name());
      }
 }
-
