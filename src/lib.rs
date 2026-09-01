@@ -30,7 +30,9 @@ mod tests
           let s = Second;
           let d = value::Value::new(3.0f32) * m.as_value();
           let t = d.clone() * s;
+          let v = d.clone() / s;
           dbg!(d);
           dbg!(t);
+          dbg!(v);
      }
 }

@@ -17,12 +17,22 @@ pub struct UnitDimensionality
 
 impl UnitDimensionality
 {
-     pub fn new<U>(unit: U) -> Self
+     pub fn new_unit<U>(unit: U) -> Self
      where
           U: unit::Unit,
      {
           Self {
                dim: 1.0,
+               _unit: sync::Arc::new(unit),
+          }
+     }
+
+     pub fn new_inv_unit<U>(unit: U) -> Self
+     where
+          U: unit::Unit,
+     {
+          Self {
+               dim: -1.0,
                _unit: sync::Arc::new(unit),
           }
      }
@@ -44,7 +54,7 @@ where
 {
      fn from(value: U) -> Self
      {
-          Self::new(value)
+          Self::new_unit(value)
      }
 }
 
@@ -112,7 +122,21 @@ where
           self.inner
                .entry(rhs.type_id())
                .and_modify(|entry| entry.dim += 1.0)
-               .or_insert(UnitDimensionality::new(rhs));
+               .or_insert(UnitDimensionality::new_unit(rhs));
+     }
+}
+
+impl<U> ops::DivAssign<U> for UnitCache
+where
+     U: unit::Unit + 'static,
+{
+     #[allow(clippy::suspicious_op_assign_impl)]
+     fn div_assign(&mut self, rhs: U)
+     {
+          self.inner
+               .entry(rhs.type_id())
+               .and_modify(|entry| entry.dim -= 1.0)
+               .or_insert(UnitDimensionality::new_inv_unit(rhs));
      }
 }
 
@@ -122,6 +146,16 @@ impl ops::MulAssign for UnitCache
      {
           rhs.inner.into_iter().for_each(|(id, ud)| {
                self.inner.entry(id).and_modify(|entry| entry.dim += ud.dim).or_insert(ud);
+          });
+     }
+}
+
+impl ops::DivAssign for UnitCache
+{
+     fn div_assign(&mut self, rhs: Self)
+     {
+          rhs.inner.into_iter().for_each(|(id, ud)| {
+               self.inner.entry(id).and_modify(|entry| entry.dim -= ud.dim).or_insert(ud);
           });
      }
 }

@@ -79,6 +79,35 @@ where
 }
 
 #[cfg(debug_assertions)]
+impl<V, U> ops::Div<U> for Value<V>
+where
+     U: unit::Unit + 'static,
+{
+     type Output = Value<V>;
+
+     fn div(mut self, rhs: U) -> Self::Output
+     {
+          self._units /= rhs;
+          self
+     }
+}
+
+#[cfg(debug_assertions)]
+impl<V> ops::Div for Value<V>
+where
+     V: ops::Div<Output = V>,
+{
+     type Output = Value<V>;
+
+     fn div(mut self, rhs: Self) -> Self::Output
+     {
+          self._units *= rhs._units;
+          self.value = self.value / rhs.value;
+          self
+     }
+}
+
+#[cfg(debug_assertions)]
 impl<V> ops::BitXor<f64> for Value<V>
 {
      type Output = Self;
