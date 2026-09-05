@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ops;
 
 use crate::number_traits;
@@ -36,6 +37,32 @@ impl<V> Value<V>
      }
 }
 
+impl<V> fmt::Display for Value<V>
+where
+     V: fmt::Display,
+{
+     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result
+     {
+          write!(fmt, "{}", self.value)?;
+          write!(fmt, " [")?;
+          let mut units = self._units.unit_dimensionality().into_iter().peekable();
+          while let Some(unit) = units.next()
+          {
+               if units.peek().is_some()
+               {
+                    write!(fmt, "{} * ", unit)?;
+               }
+               else
+               {
+                    write!(fmt, "{}", unit)?;
+               }
+          }
+          write!(fmt, "]")?;
+          Ok(())
+     }
+}
+
+#[cfg(debug_assertions)]
 impl<V> From<unit_cache::UnitCache> for Value<V>
 where
      V: number_traits::Number,
@@ -121,39 +148,39 @@ impl<V> ops::BitXor<f64> for Value<V>
      }
 }
 
-#[cfg(not(debug_assertions))]
-impl<V> Value<V>
-{
-     pub fn new(value: V) -> Self
-     {
-          Self {
-               Value,
-          }
-     }
-}
+// #[cfg(not(debug_assertions))]
+// impl<V> Value<V>
+// {
+//      pub fn new(value: V) -> Self
+//      {
+//           Self {
+//                Value,
+//           }
+//      }
+// }
 
-#[cfg(not(debug_assertions))]
-impl<V, U> ops::Mul<U> for Value<V>
-where
-     U: unit::Unit + 'static,
-{
-     type Output = Value<V>;
+// #[cfg(not(debug_assertions))]
+// impl<V, U> ops::Mul<U> for Value<V>
+// where
+//      U: unit::Unit + 'static,
+// {
+//      type Output = Value<V>;
 
-     fn mul(mut self, rhs: U) -> Self::Output
-     {
-          self
-     }
-}
+//      fn mul(mut self, rhs: U) -> Self::Output
+//      {
+//           self
+//      }
+// }
 
-#[cfg(not(debug_assertions))]
-impl<V> ops::BitXor<f64> for Value<V>
-{
-     type Output = Self;
+// #[cfg(not(debug_assertions))]
+// impl<V> ops::BitXor<f64> for Value<V>
+// {
+//      type Output = Self;
 
-     fn bitxor(self, rhs: f64) -> Self::Output
-     {
-          Self {
-               value: self.value,
-          }
-     }
-}
+//      fn bitxor(self, rhs: f64) -> Self::Output
+//      {
+//           Self {
+//                value: self.value,
+//           }
+//      }
+// }

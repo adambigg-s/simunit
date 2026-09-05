@@ -16,12 +16,24 @@ mod tests
      #[derive(Clone, Copy)]
      pub struct Meter;
 
-     impl unit::Unit for Meter {}
+     impl unit::Unit for Meter
+     {
+          fn display_name(&self) -> &'static str
+          {
+               "m"
+          }
+     }
 
      #[derive(Clone, Copy)]
      pub struct Second;
 
-     impl unit::Unit for Second {}
+     impl unit::Unit for Second
+     {
+          fn display_name(&self) -> &'static str
+          {
+               "s"
+          }
+     }
 
      #[test]
      fn main_for_tests()
@@ -31,6 +43,9 @@ mod tests
           let d = value::Value::new(3.0f32) * m.as_value();
           let t = d.clone() * s;
           let v = d.clone() / s;
+
+          println!("The value is: {}", v);
+
           dbg!(d);
           dbg!(t);
           dbg!(v);

@@ -73,3 +73,17 @@ impl Number for f16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) ->
 impl Number for f32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
 impl Number for f64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
 impl Number for f128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+
+pub trait AlmostInteger
+where
+     Self: Number,
+{
+     fn almost(&self) -> bool;
+}
+
+impl AlmostInteger for f16  { fn almost(&self) -> bool { (self - self.round() as u16 as f16) < f16::EPSILON    } }
+impl AlmostInteger for f32  { fn almost(&self) -> bool { (self - self.round() as u32 as f32) < f32::EPSILON    } }
+impl AlmostInteger for f64  { fn almost(&self) -> bool { (self - self.round() as u64 as f64) < f64::EPSILON    } }
+impl AlmostInteger for f128 { fn almost(&self) -> bool { (self - self.round() as u128 as f128) < f128::EPSILON } }
+
+

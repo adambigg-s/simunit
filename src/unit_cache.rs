@@ -6,6 +6,7 @@ use std::sync;
 
 use rustc_hash as rh;
 
+use crate::number_traits::AlmostInteger;
 use crate::unit;
 
 #[derive(Clone)]
@@ -69,6 +70,22 @@ impl fmt::Debug for UnitDimensionality
      }
 }
 
+impl fmt::Display for UnitDimensionality
+{
+     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result
+     {
+          if self.dim.almost()
+          {
+               write!(fmt, "{}^{:.0}", self._unit.display_name(), self.dim.round())?;
+          }
+          else
+          {
+               write!(fmt, "{}^{:.2}", self._unit.display_name(), self.dim)?;
+          }
+          Ok(())
+     }
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct UnitCache
 {
@@ -85,6 +102,16 @@ impl UnitCache
      pub fn unit_dimensionality(&self) -> Vec<UnitDimensionality>
      {
           self.inner.values().cloned().collect()
+     }
+
+     pub fn inner(&self) -> &rh::FxHashMap<any::TypeId, UnitDimensionality>
+     {
+          &self.inner
+     }
+
+     pub fn set_inner(&mut self, inner: rh::FxHashMap<any::TypeId, UnitDimensionality>)
+     {
+          self.inner = inner;
      }
 }
 
