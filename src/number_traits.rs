@@ -76,17 +76,17 @@ pub mod implementation {
      impl Number for f64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
      impl Number for f128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
 
-     pub trait AlmostInteger
+     pub trait IsIntegral
      where
           Self: Number,
      {
           fn almost(&self) -> bool;
      }
 
-     impl AlmostInteger for f16  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i16 as f16).abs() < f16::EPSILON    } }
-     impl AlmostInteger for f32  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i32 as f32).abs() < f32::EPSILON    } }
-     impl AlmostInteger for f64  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i64 as f64).abs() < f64::EPSILON    } }
-     impl AlmostInteger for f128 { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i128 as f128).abs() < f128::EPSILON } }
+     impl IsIntegral for f16  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i16 as f16).abs() < f16::EPSILON    } }
+     impl IsIntegral for f32  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i32 as f32).abs() < f32::EPSILON    } }
+     impl IsIntegral for f64  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i64 as f64).abs() < f64::EPSILON    } }
+     impl IsIntegral for f128 { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i128 as f128).abs() < f128::EPSILON } }
 }
 
 #[cfg(test)]
@@ -101,5 +101,7 @@ mod ttt_number_traits
           assert!((-1.0).almost());
           assert!(!(1.000001).almost());
           assert!(!(-1.000001).almost());
+          assert!((1.0000000000000000000000001).almost());
+          assert!((-1.0000000000000000000000001).almost());
      }
 }

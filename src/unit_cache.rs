@@ -7,7 +7,7 @@ use std::sync;
 
 use rustc_hash as rh;
 
-use crate::number_traits::AlmostInteger;
+use crate::number_traits::IsIntegral;
 use crate::unit;
 
 #[derive(Clone)]
@@ -152,6 +152,16 @@ impl UnitCache
      {
           self.inner = inner;
      }
+
+     pub fn check_homogenous(&self, cmp: Vec<UnitDimensionality>) -> bool
+     {
+          self == &Self::from(cmp)
+     }
+
+     pub fn purge_dimensionless(&mut self)
+     {
+          self.inner.retain(|_, unit| unit.dim.abs() < f64::EPSILON);
+     }
 }
 
 impl From<UnitDimensionality> for UnitCache
@@ -161,6 +171,14 @@ impl From<UnitDimensionality> for UnitCache
           Self {
                inner: rh::FxHashMap::from_iter(vec![((*value._unit).type_id(), value)]),
           }
+     }
+}
+
+impl From<Vec<UnitDimensionality>> for UnitCache
+{
+     fn from(value: Vec<UnitDimensionality>) -> Self
+     {
+          value.iter().fold(Self::new(), |collector, rhs| collector * rhs.clone())
      }
 }
 
@@ -186,7 +204,19 @@ impl ops::BitXor<f64> for UnitCache
      fn bitxor(mut self, rhs: f64) -> Self::Output
      {
           self.inner.values_mut().for_each(|ud| ud.dim *= rhs);
+          self.purge_dimensionless();
           self
+     }
+}
+
+impl ops::MulAssign for UnitCache
+{
+     fn mul_assign(&mut self, rhs: Self)
+     {
+          rhs.inner.into_iter().for_each(|(id, ud)| {
+               self.inner.entry(id).and_modify(|entry| entry.dim += ud.dim).or_insert(ud);
+          });
+          self.purge_dimensionless();
      }
 }
 
@@ -201,6 +231,41 @@ where
                .entry(rhs.type_id())
                .and_modify(|entry| entry.dim += 1.0)
                .or_insert(UnitDimensionality::new_unit(rhs));
+          self.purge_dimensionless();
+     }
+}
+
+impl ops::Mul<UnitDimensionality> for UnitCache
+{
+     type Output = Self;
+
+     fn mul(mut self, rhs: UnitDimensionality) -> Self::Output
+     {
+          self.inner
+               .entry(rhs._unit.type_id())
+               .and_modify(|entry| entry.dim += rhs.dim)
+               .or_insert(rhs);
+          self.purge_dimensionless();
+          self
+     }
+}
+
+impl ops::MulAssign<UnitDimensionality> for UnitCache
+{
+     fn mul_assign(&mut self, rhs: UnitDimensionality)
+     {
+          *self = self.clone() * rhs;
+     }
+}
+
+impl ops::DivAssign for UnitCache
+{
+     fn div_assign(&mut self, rhs: Self)
+     {
+          rhs.inner.into_iter().for_each(|(id, ud)| {
+               self.inner.entry(id).and_modify(|entry| entry.dim -= ud.dim).or_insert(ud);
+          });
+          self.purge_dimensionless();
      }
 }
 
@@ -215,30 +280,12 @@ where
                .entry(rhs.type_id())
                .and_modify(|entry| entry.dim -= 1.0)
                .or_insert(UnitDimensionality::new_inv_unit(rhs));
-     }
-}
-
-impl ops::MulAssign for UnitCache
-{
-     fn mul_assign(&mut self, rhs: Self)
-     {
-          rhs.inner.into_iter().for_each(|(id, ud)| {
-               self.inner.entry(id).and_modify(|entry| entry.dim += ud.dim).or_insert(ud);
-          });
-     }
-}
-
-impl ops::DivAssign for UnitCache
-{
-     fn div_assign(&mut self, rhs: Self)
-     {
-          rhs.inner.into_iter().for_each(|(id, ud)| {
-               self.inner.entry(id).and_modify(|entry| entry.dim -= ud.dim).or_insert(ud);
-          });
+          self.purge_dimensionless();
      }
 }
 
 #[cfg(test)]
+#[allow(unused)]
 mod ttt_unit_cache
 {
      use super::*;
