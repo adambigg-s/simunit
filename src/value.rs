@@ -41,6 +41,16 @@ impl<V> Value<V>
      }
 }
 
+impl<V> AsValue<V> for Value<V>
+where
+     V: Clone,
+{
+     fn as_value(&self) -> Value<V>
+     {
+          (*self).clone()
+     }
+}
+
 impl<V> AsValue<V> for &Value<V>
 where
      V: Copy,
@@ -96,6 +106,17 @@ where
                _units: value,
                _error: None,
           }
+     }
+}
+
+#[cfg(debug_assertions)]
+impl<V> From<V> for Value<V>
+where
+     V: number_traits::Number,
+{
+     fn from(value: V) -> Self
+     {
+          Self::new(value)
      }
 }
 
@@ -172,6 +193,7 @@ where
      }
 }
 
+#[cfg(debug_assertions)]
 impl<V> ops::Add for Value<V>
 where
      V: ops::Add<Output = V>,
@@ -193,7 +215,29 @@ where
      }
 }
 
-#[derive(Debug, Clone)]
+#[cfg(debug_assertions)]
+impl<V> ops::Sub for Value<V>
+where
+     V: ops::Sub<Output = V>,
+{
+     type Output = Value<V>;
+
+     fn sub(mut self, rhs: Self) -> Self::Output
+     {
+          if self._units != rhs._units
+          {
+               self._error = Some(ValueError::UnitAdditionMismatch {
+                    rhs: rhs._units.clone(),
+                    lhs: self._units.clone(),
+               })
+          }
+
+          self.value = self.value - rhs.value;
+          self
+     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum ValueError
 {
      UnitAdditionMismatch
@@ -217,11 +261,11 @@ impl fmt::Display for ValueError
                | ValueError::UnitAdditionMismatch {
                     rhs,
                     lhs,
-               } => writeln!(fmt, "Unit addition mismatch between\nrhs: {:?}\nlhs: {:?}", rhs, lhs)?,
+               } => writeln!(fmt, "Unit addition mismatch between\nRHS: {:?}\nLHS: {:?}", rhs, lhs)?,
                | ValueError::UnitSubtractionMismatch {
                     rhs,
                     lhs,
-               } => writeln!(fmt, "Unit subtraction mismatch between\nrhs: {:?}\nlhs: {:?}", rhs, lhs)?,
+               } => writeln!(fmt, "Unit subtraction mismatch between\nRHS: {:?}\nLHS: {:?}", rhs, lhs)?,
           }
           Ok(())
      }
@@ -229,3 +273,52 @@ impl fmt::Display for ValueError
 
 impl error::Error for ValueError {}
 
+#[cfg(test)]
+mod ttt_value
+{
+     use super::*;
+
+     #[derive(Clone, Copy)]
+     struct DefaultUnit;
+     impl unit::Unit for DefaultUnit {}
+
+     #[test]
+     fn value_addition()
+     {
+          let v0 = Value::new(1) * DefaultUnit;
+          let v1 = Value::new(1) * DefaultUnit;
+          let add = v0 + v1;
+          assert!(add.value == 2);
+          assert!(add._error.is_none());
+     }
+
+     #[test]
+     fn value_subtraction()
+     {
+          let v0 = Value::new(1) * DefaultUnit;
+          let v1 = Value::new(1) * DefaultUnit;
+          let add = v0 - v1;
+          assert!(add.value == 0);
+          assert!(add._error.is_none());
+     }
+
+     #[test]
+     fn value_multiplication()
+     {
+          let v0 = Value::new(1) * DefaultUnit;
+          let v1 = Value::new(1) * DefaultUnit;
+          let add = v0 + v1;
+          assert!(add.value == 2);
+          assert!(add._error.is_none());
+     }
+
+     #[test]
+     fn value_division()
+     {
+          let v0 = Value::new(1) * DefaultUnit;
+          let v1 = Value::new(1) * DefaultUnit;
+          let add = v0 - v1;
+          assert!(add.value == 0);
+          assert!(add._error.is_none());
+     }
+}

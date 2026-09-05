@@ -24,3 +24,17 @@ where
           value::Value::from(unit_cache::UnitCache::from(unit_cache::UnitDimensionality::from(*self)))
      }
 }
+
+#[cfg(test)]
+mod ttt_unit
+{
+     use super::*;
+     use crate::unit;
+
+     #[derive(Clone, Copy)]
+     struct DefaultUnit;
+     impl unit::Unit for DefaultUnit {}
+
+     #[test]
+     fn unit() {}
+}

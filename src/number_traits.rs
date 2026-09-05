@@ -83,12 +83,23 @@ pub mod implementation {
           fn almost(&self) -> bool;
      }
 
-     impl AlmostInteger for f16  { fn almost(&self) -> bool { (self - self.round() as u16 as f16) < f16::EPSILON    } }
-     impl AlmostInteger for f32  { fn almost(&self) -> bool { (self - self.round() as u32 as f32) < f32::EPSILON    } }
-     impl AlmostInteger for f64  { fn almost(&self) -> bool { (self - self.round() as u64 as f64) < f64::EPSILON    } }
-     impl AlmostInteger for f128 { fn almost(&self) -> bool { (self - self.round() as u128 as f128) < f128::EPSILON } }
+     impl AlmostInteger for f16  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i16 as f16).abs() < f16::EPSILON    } }
+     impl AlmostInteger for f32  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i32 as f32).abs() < f32::EPSILON    } }
+     impl AlmostInteger for f64  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i64 as f64).abs() < f64::EPSILON    } }
+     impl AlmostInteger for f128 { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i128 as f128).abs() < f128::EPSILON } }
 }
 
 #[cfg(test)]
 mod ttt_number_traits
-{}
+{
+     use super::*;
+
+     #[test]
+     fn almost_integer()
+     {
+          assert!((1.0).almost());
+          assert!((-1.0).almost());
+          assert!(!(1.000001).almost());
+          assert!(!(-1.000001).almost());
+     }
+}

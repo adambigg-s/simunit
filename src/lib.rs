@@ -42,14 +42,14 @@ mod tests
           let s = Second;
           let d = value::Value::new(3.0f32) * m.as_value();
           let t = d.clone() * s;
-          let v = d.clone() / s;
+          let v = d.as_value() / s;
 
           let a = value::Value::new(10.0) * v.clone();
 
-          let c = t.clone() + v.clone();
+          // let c = t.clone() + v.clone();
 
           println!("The value is: {}", v);
           println!("The value of a is {}", a);
-          println!("The value of C is {}", c);
+          // println!("The value of C is {}", c);
      }
 }

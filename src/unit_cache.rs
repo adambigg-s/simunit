@@ -237,3 +237,9 @@ impl ops::DivAssign for UnitCache
           });
      }
 }
+
+#[cfg(test)]
+mod ttt_unit_cache
+{
+     use super::*;
+}
