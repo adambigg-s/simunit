@@ -44,10 +44,12 @@ mod tests
           let t = d.clone() * s;
           let v = d.clone() / s;
 
-          println!("The value is: {}", v);
+          let a = value::Value::new(10.0) * v.clone();
 
-          dbg!(d);
-          dbg!(t);
-          dbg!(v);
+          let c = t.clone() + v.clone();
+
+          println!("The value is: {}", v);
+          println!("The value of a is {}", a);
+          println!("The value of C is {}", c);
      }
 }

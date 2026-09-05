@@ -1,10 +1,10 @@
+use std::error;
 use std::fmt;
 use std::ops;
 
 use crate::number_traits;
 use crate::unit;
 use crate::unit_cache;
-#[cfg(debug_assertions)]
 use crate::unit_cache as uc;
 
 pub trait AsValue<V>
@@ -16,8 +16,11 @@ pub trait AsValue<V>
 pub struct Value<V>
 {
      pub value: V,
+
      #[cfg(debug_assertions)]
      _units: uc::UnitCache,
+     #[cfg(debug_assertions)]
+     _error: Option<ValueError>,
 }
 
 #[cfg(debug_assertions)]
@@ -28,6 +31,7 @@ impl<V> Value<V>
           Self {
                value,
                _units: uc::UnitCache::new(),
+               _error: None,
           }
      }
 
@@ -37,18 +41,36 @@ impl<V> Value<V>
      }
 }
 
+impl<V> AsValue<V> for &Value<V>
+where
+     V: Copy,
+{
+     fn as_value(&self) -> Value<V>
+     {
+          (*self).clone()
+     }
+}
+
 impl<V> fmt::Display for Value<V>
 where
      V: fmt::Display,
 {
      fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result
      {
+          if let Some(error) = &self._error
+          {
+               write!(fmt, "{}", error)?;
+               return Err(fmt::Error);
+          }
+
           write!(fmt, "{}", self.value)?;
           write!(fmt, " [")?;
-          let mut units = self._units.unit_dimensionality().into_iter().peekable();
-          while let Some(unit) = units.next()
+          let mut units = self._units.unit_dimensionality();
+          units.sort_unstable_by(|a, b| a.unit().display_name().cmp(b.unit().display_name()));
+          let mut units_iter = units.into_iter().peekable();
+          while let Some(unit) = units_iter.next()
           {
-               if units.peek().is_some()
+               if units_iter.peek().is_some()
                {
                     write!(fmt, "{} * ", unit)?;
                }
@@ -72,6 +94,22 @@ where
           Self {
                value: V::one(),
                _units: value,
+               _error: None,
+          }
+     }
+}
+
+#[cfg(debug_assertions)]
+impl<V> ops::BitXor<f64> for Value<V>
+{
+     type Output = Self;
+
+     fn bitxor(self, rhs: f64) -> Self::Output
+     {
+          Self {
+               value: self.value,
+               _units: self._units ^ rhs,
+               _error: None,
           }
      }
 }
@@ -134,53 +172,60 @@ where
      }
 }
 
-#[cfg(debug_assertions)]
-impl<V> ops::BitXor<f64> for Value<V>
+impl<V> ops::Add for Value<V>
+where
+     V: ops::Add<Output = V>,
 {
-     type Output = Self;
+     type Output = Value<V>;
 
-     fn bitxor(self, rhs: f64) -> Self::Output
+     fn add(mut self, rhs: Self) -> Self::Output
      {
-          Self {
-               value: self.value,
-               _units: self._units ^ rhs,
+          if self._units != rhs._units
+          {
+               self._error = Some(ValueError::UnitAdditionMismatch {
+                    rhs: rhs._units.clone(),
+                    lhs: self._units.clone(),
+               })
           }
+
+          self.value = self.value + rhs.value;
+          self
      }
 }
 
-// #[cfg(not(debug_assertions))]
-// impl<V> Value<V>
-// {
-//      pub fn new(value: V) -> Self
-//      {
-//           Self {
-//                Value,
-//           }
-//      }
-// }
+#[derive(Debug, Clone)]
+pub enum ValueError
+{
+     UnitAdditionMismatch
+     {
+          rhs: unit_cache::UnitCache,
+          lhs: unit_cache::UnitCache,
+     },
+     UnitSubtractionMismatch
+     {
+          rhs: unit_cache::UnitCache,
+          lhs: unit_cache::UnitCache,
+     },
+}
 
-// #[cfg(not(debug_assertions))]
-// impl<V, U> ops::Mul<U> for Value<V>
-// where
-//      U: unit::Unit + 'static,
-// {
-//      type Output = Value<V>;
+impl fmt::Display for ValueError
+{
+     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result
+     {
+          match self
+          {
+               | ValueError::UnitAdditionMismatch {
+                    rhs,
+                    lhs,
+               } => writeln!(fmt, "Unit addition mismatch between\nrhs: {:?}\nlhs: {:?}", rhs, lhs)?,
+               | ValueError::UnitSubtractionMismatch {
+                    rhs,
+                    lhs,
+               } => writeln!(fmt, "Unit subtraction mismatch between\nrhs: {:?}\nlhs: {:?}", rhs, lhs)?,
+          }
+          Ok(())
+     }
+}
 
-//      fn mul(mut self, rhs: U) -> Self::Output
-//      {
-//           self
-//      }
-// }
+impl error::Error for ValueError {}
 
-// #[cfg(not(debug_assertions))]
-// impl<V> ops::BitXor<f64> for Value<V>
-// {
-//      type Output = Self;
-
-//      fn bitxor(self, rhs: f64) -> Self::Output
-//      {
-//           Self {
-//                value: self.value,
-//           }
-//      }
-// }

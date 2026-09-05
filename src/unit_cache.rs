@@ -1,4 +1,5 @@
 use std::any;
+use std::cmp;
 use std::f64;
 use std::fmt;
 use std::ops;
@@ -47,15 +48,25 @@ impl UnitDimensionality
                _unit: sync::Arc::new(unit),
           }
      }
-}
 
-impl<U> From<U> for UnitDimensionality
-where
-     U: unit::Unit,
-{
-     fn from(value: U) -> Self
+     pub fn dim(&self) -> f64
      {
-          Self::new_unit(value)
+          self.dim
+     }
+
+     pub fn set_dim(&mut self, dim: f64)
+     {
+          self.dim = dim;
+     }
+
+     pub fn unit(&self) -> sync::Arc<dyn unit::Unit>
+     {
+          sync::Arc::clone(&self._unit)
+     }
+
+     pub fn set_unit(&mut self, _unit: sync::Arc<dyn unit::Unit>)
+     {
+          self._unit = _unit;
      }
 }
 
@@ -74,15 +85,43 @@ impl fmt::Display for UnitDimensionality
 {
      fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result
      {
-          if self.dim.almost()
+          if !self.dim.almost()
           {
-               write!(fmt, "{}^{:.0}", self._unit.display_name(), self.dim.round())?;
+               write!(fmt, "{}^{:.2}", self._unit.display_name(), self.dim)?;
+               return Ok(());
+          }
+
+          if self.dim().round() == 0.0
+          {
+               return Ok(());
+          }
+          else if self.dim().round() == 1.0
+          {
+               write!(fmt, "{}", self._unit.display_name())?;
           }
           else
           {
-               write!(fmt, "{}^{:.2}", self._unit.display_name(), self.dim)?;
+               write!(fmt, "{}^{:.0}", self._unit.display_name(), self.dim.round())?;
           }
           Ok(())
+     }
+}
+
+impl<U> From<U> for UnitDimensionality
+where
+     U: unit::Unit,
+{
+     fn from(value: U) -> Self
+     {
+          Self::new_unit(value)
+     }
+}
+
+impl cmp::PartialEq for UnitDimensionality
+{
+     fn eq(&self, other: &Self) -> bool
+     {
+          self.dim == other.dim
      }
 }
 
@@ -119,12 +158,24 @@ impl From<UnitDimensionality> for UnitCache
 {
      fn from(value: UnitDimensionality) -> Self
      {
-          let key = (*value._unit).type_id();
-          let mut hash = rh::FxHashMap::default();
-          hash.insert(key, value);
           Self {
-               inner: hash,
+               inner: rh::FxHashMap::from_iter(vec![((*value._unit).type_id(), value)]),
           }
+     }
+}
+
+impl cmp::PartialEq for UnitCache
+{
+     fn eq(&self, other: &Self) -> bool
+     {
+          if self.inner.len() != other.inner.len()
+          {
+               return false;
+          }
+
+          self.inner
+               .iter()
+               .all(|(unit, outer_dimension)| other.inner.get(unit) == Some(outer_dimension))
      }
 }
 
