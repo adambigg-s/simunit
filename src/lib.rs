@@ -14,7 +14,7 @@ pub use value::AsValue;
 pub use value::Value;
 
 #[cfg(test)]
-mod practical_test
+mod ttt_practical_test
 {
      use crate::AsValue;
      use crate::unit;
@@ -36,6 +36,7 @@ mod practical_test
 
           let f = g * m0 * m1 / (d ^ 2.0);
 
+          println!("Force: {}", f);
           assert!(f._units().check_homogenous(vec![
                unit_cache::UnitDimensionality::new_unit(Kilogram),
                unit_cache::UnitDimensionality::new_unit(Meter),

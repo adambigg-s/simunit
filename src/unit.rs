@@ -15,6 +15,7 @@ where
 mod ttt_unit
 {
      use super::*;
+     use crate::unit;
 
      struct TestingUnit;
      impl unit::Unit for TestingUnit {}
