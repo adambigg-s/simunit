@@ -162,6 +162,16 @@ impl UnitCache
      {
           self.inner.retain(|_, unit| unit.dim.abs() < f64::EPSILON);
      }
+
+     pub fn dimensionless(&self) -> bool
+     {
+          if self.inner.is_empty()
+          {
+               return true;
+          }
+
+          self.inner.iter().all(|(_, unit)| unit.dim < f64::EPSILON)
+     }
 }
 
 impl From<UnitDimensionality> for UnitCache

@@ -156,13 +156,37 @@ where
 }
 
 #[cfg(debug_assertions)]
-impl<V> ops::BitXor<f64> for Value<V>
+impl<V> ops::BitXor<V> for Value<V>
+where
+     V: number_traits::Number + Copy,
 {
      type Output = Self;
 
-     fn bitxor(mut self, rhs: f64) -> Self::Output
+     fn bitxor(mut self, rhs: V) -> Self::Output
      {
-          self._units = self._units ^ rhs;
+          self._units = self._units ^ rhs.to_f64();
+          self.value = self.value.pow(rhs);
+          self
+     }
+}
+
+#[cfg(debug_assertions)]
+impl<V> ops::BitXor<Value<V>> for Value<V>
+where
+     V: number_traits::Number + Copy,
+{
+     type Output = Self;
+
+     fn bitxor(mut self, rhs: Value<V>) -> Self::Output
+     {
+          if !rhs._units.dimensionless()
+          {
+               self._error = Some(ValueError::UnitExponentiationError {
+                    exp: rhs._units.clone(),
+               })
+          }
+
+          self = self ^ rhs.value;
           self
      }
 }
@@ -464,6 +488,10 @@ pub enum ValueError
           rhs: uc::UnitCache,
           lhs: uc::UnitCache,
      },
+     UnitExponentiationError
+     {
+          exp: uc::UnitCache,
+     },
 }
 
 #[cfg(debug_assertions)]
@@ -481,7 +509,18 @@ impl fmt::Display for ValueError
                     rhs,
                     lhs,
                } => writeln!(fmt, "Unit subtraction mismatch between\nRHS: {:?}\nLHS: {:?}", rhs, lhs)?,
+               | ValueError::UnitExponentiationError {
+                    exp,
+               } =>
+               {
+                    write!(
+                         fmt,
+                         "Unit exponent mismatch\nEXP: {:?}\nExponent must be dimensionless for a physically signifigant quantity",
+                         exp
+                    )?
+               }
           }
+
           Ok(())
      }
 }
@@ -601,6 +640,20 @@ mod ttt_value
                uc::UnitDimensionality::new_inv_unit(TestingUnit),
                uc::UnitDimensionality::new_inv_unit(TestingUnit),
           ]));
+     }
+
+     #[test]
+     fn value_exponentiation()
+     {
+          let v = (2.0).as_value() * TestingUnit;
+          let exp = v ^ 3.0;
+          assert!(exp.value == 8.0);
+          assert!(exp._error.is_none());
+          assert!(exp._units.check_homogenous(vec![
+               uc::UnitDimensionality::new_inv_unit(TestingUnit),
+               uc::UnitDimensionality::new_inv_unit(TestingUnit),
+               uc::UnitDimensionality::new_inv_unit(TestingUnit),
+          ]))
      }
 }
 

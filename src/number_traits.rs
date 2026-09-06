@@ -3,6 +3,38 @@ pub use implementation::*;
 #[rustfmt::skip]
 #[allow(clippy::unnecessary_cast)]
 pub mod implementation {
+    use std::ops;
+
+     pub trait Number
+     where
+          Self: ops::Add + ops::Sub + ops::Mul + ops::Div + AddIdentity + MulIdentity + Exponentiate + IsIntegral + Sized,
+     {
+          fn to_f16(self) -> f16;
+
+          fn to_f32(self) -> f32;
+
+          fn to_f64(self) -> f64;
+
+          fn to_f128(self) -> f128;
+     }
+
+     impl Number for u8   { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for u16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for u32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for u64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for u128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+
+     impl Number for i8   { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for i16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for i32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for i64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for i128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+
+     impl Number for f16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for f32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for f64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+     impl Number for f128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
+
      pub trait AddIdentity {
           fn zero() -> Self;
      }
@@ -46,47 +78,49 @@ pub mod implementation {
      impl MulIdentity for f64  { fn one() -> Self { 1 as f64  } }
      impl MulIdentity for f128 { fn one() -> Self { 1 as f128 } }
 
-     pub trait Number
-     where
-          Self: AddIdentity + MulIdentity,
-     {
-          fn to_f16(self) -> f16;
-
-          fn to_f32(self) -> f32;
-
-          fn to_f64(self) -> f64;
-
-          fn to_f128(self) -> f128;
-     }
-
-     impl Number for u8   { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for u16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for u32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for u64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for u128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-
-     impl Number for i8   { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for i16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for i32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for i64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for i128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-
-     impl Number for f16  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for f32  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for f64  { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-     impl Number for f128 { fn to_f16(self) -> f16 { self as f16 } fn to_f32(self) -> f32 { self as f32 } fn to_f64(self) -> f64 { self as f64 } fn to_f128(self) -> f128 { self as f128 } }
-
      pub trait IsIntegral
-     where
-          Self: Number,
      {
           fn almost(&self) -> bool;
      }
+
+     impl IsIntegral for u8   { fn almost(&self) -> bool { true } }
+     impl IsIntegral for u16  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for u32  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for u64  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for u128 { fn almost(&self) -> bool { true } }
+
+     impl IsIntegral for i8   { fn almost(&self) -> bool { true } }
+     impl IsIntegral for i16  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for i32  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for i64  { fn almost(&self) -> bool { true } }
+     impl IsIntegral for i128 { fn almost(&self) -> bool { true } }
 
      impl IsIntegral for f16  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i16 as f16).abs() < f16::EPSILON    } }
      impl IsIntegral for f32  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i32 as f32).abs() < f32::EPSILON    } }
      impl IsIntegral for f64  { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i64 as f64).abs() < f64::EPSILON    } }
      impl IsIntegral for f128 { fn almost(&self) -> bool { (self.abs() - self.abs().round() as i128 as f128).abs() < f128::EPSILON } }
+
+     pub trait Exponentiate
+     {
+          fn pow(&self, pow: Self) -> Self;
+     }
+
+     impl Exponentiate for f16  { fn pow(&self, pow: Self) -> Self { self.powf(pow) } }
+     impl Exponentiate for f32  { fn pow(&self, pow: Self) -> Self { self.powf(pow) } }
+     impl Exponentiate for f64  { fn pow(&self, pow: Self) -> Self { self.powf(pow) } }
+     impl Exponentiate for f128 { fn pow(&self, pow: Self) -> Self { self.powf(pow) } }
+
+     impl Exponentiate for u8   { fn pow(&self, pow: Self) -> Self { u8::pow(*self, pow as u32)   } }
+     impl Exponentiate for u16  { fn pow(&self, pow: Self) -> Self { u16::pow(*self, pow as u32)  } }
+     impl Exponentiate for u32  { fn pow(&self, pow: Self) -> Self { u32::pow(*self, pow as u32)  } }
+     impl Exponentiate for u64  { fn pow(&self, pow: Self) -> Self { u64::pow(*self, pow as u32)  } }
+     impl Exponentiate for u128 { fn pow(&self, pow: Self) -> Self { u128::pow(*self, pow as u32) } }
+
+     impl Exponentiate for i8   { fn pow(&self, pow: Self) -> Self { i8::pow(*self, pow as u32)   } }
+     impl Exponentiate for i16  { fn pow(&self, pow: Self) -> Self { i16::pow(*self, pow as u32)  } }
+     impl Exponentiate for i32  { fn pow(&self, pow: Self) -> Self { i32::pow(*self, pow as u32)  } }
+     impl Exponentiate for i64  { fn pow(&self, pow: Self) -> Self { i64::pow(*self, pow as u32)  } }
+     impl Exponentiate for i128 { fn pow(&self, pow: Self) -> Self { i128::pow(*self, pow as u32) } }
 }
 
 #[cfg(test)]
