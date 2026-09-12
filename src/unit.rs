@@ -14,7 +14,6 @@ where
 #[cfg(not(debug_assertions))]
 mod ttt_unit
 {
-     use super::*;
      use crate::unit;
 
      struct TestingUnit;

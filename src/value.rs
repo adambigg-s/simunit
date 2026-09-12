@@ -6,6 +6,7 @@ use std::ops;
 
 #[cfg(debug_assertions)]
 use crate::number_traits;
+use crate::redux;
 use crate::unit;
 #[cfg(debug_assertions)]
 use crate::unit_cache as uc;
@@ -13,6 +14,16 @@ use crate::unit_cache as uc;
 pub trait AsValue<V>
 {
      fn as_value(&self) -> Value<V>;
+}
+
+impl<V> AsValue<V> for V
+where
+     V: Clone,
+{
+     fn as_value(&self) -> Value<V>
+     {
+          Value::new(self.clone())
+     }
 }
 
 #[derive(Debug, Default, Clone)]
@@ -65,6 +76,14 @@ impl<V> Value<V>
      }
 }
 
+impl<V> redux::UnitRedux for Value<V>
+{
+     fn reduce(&mut self, registry: redux::ReduxRule)
+     {
+          todo!()
+     }
+}
+
 impl<V> AsValue<V> for Value<V>
 where
      V: Clone,
@@ -82,16 +101,6 @@ where
      fn as_value(&self) -> Value<V>
      {
           (*self).clone()
-     }
-}
-
-impl<V> AsValue<V> for V
-where
-     V: Clone,
-{
-     fn as_value(&self) -> Value<V>
-     {
-          Value::new(self.clone())
      }
 }
 

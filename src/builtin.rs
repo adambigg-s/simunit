@@ -1,3 +1,5 @@
+#![allow(ambiguous_glob_reexports)]
+
 pub use general::*;
 pub use imperial::*;
 pub use si::*;
@@ -16,12 +18,18 @@ macro_rules! unit {
           }
      };
 }
+// unit!( => "");
 
 pub mod general
 {
-     unit!(Radian => "rad");
-     unit!(Degree => "deg");
-     /* ... */
+     pub use dimensionless::*;
+
+     pub mod dimensionless
+     {
+          unit!(Radian => "rad");
+          unit!(Degree => "deg");
+          /* ... */
+     }
 }
 
 pub mod si
@@ -56,6 +64,30 @@ pub mod si
 
 pub mod imperial
 {
-     unit!(Pound => "lb");
-     /* ... */
+
+     pub use base::*;
+     pub use derived::*;
+
+     pub mod base
+     {
+          unit!(PoundMass => "lbm");
+          unit!(Yard => "yd");
+          unit!(Second => "s");
+          unit!(Gallon => "gal");
+          /* ... */
+     }
+
+     pub mod derived
+     {
+          unit!(PoundForce => "lbf");
+          unit!(Grain => "gr");
+          unit!(Ounce => "oz");
+          unit!(Stone => "st");
+          unit!(Slug => "slug");
+          unit!(Foot => "ft");
+          unit!(Mile => "mi");
+          unit!(Quart => "qt");
+          unit!(FluidOz => "fl oz");
+          /* ... */
+     }
 }

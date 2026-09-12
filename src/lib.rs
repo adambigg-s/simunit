@@ -1,3 +1,4 @@
+#![feature(never_type)]
 #![feature(f16)]
 #![feature(f128)]
 
